@@ -1,0 +1,47 @@
+# Skill Development System → GIL Canonical Schema Mapping
+# SIH26129: Schema Mapping Engine config
+# Source: Skill SOAP/XML system fields (post XML→JSON parse by SoapAdapter)
+# Target: GIL canonical citizen schema
+
+system: skill
+version: 1
+
+fields:
+  # Identity
+  - source: sk_id
+    target: system_identifier
+    type: string
+
+  # Personal
+  - source: candidate_name
+    target: name
+    type: string
+
+  - source: date_of_birth
+    target: dob
+    type: date
+    transform: date_format
+    params:
+      from: "%d/%m/%Y"
+      to: "ISO8601"
+
+  - source: district
+    target: district
+    type: string
+
+  # Skill-specific fields
+  - source: skills
+    target: skills
+    type: string          # list serialised as-is
+
+  - source: certifications
+    target: certifications
+    type: string          # list of cert dicts serialised as-is
+
+  - source: training_hours
+    target: training_hours
+    type: int
+
+  - source: assessment_score
+    target: assessment_score
+    type: float

@@ -1,0 +1,35 @@
+{
+  "_comment": "RBAC controls RESPONSE visibility only. Fetch authorization is governed by consent. Redacted fields are replaced with '<redacted>' in the API response and logged in the audit record with action='field_redacted'.",
+  "roles": {
+    "Citizen": {
+      "visible_fields": [
+        "name", "dob", "phone", "email", "district", "state",
+        "employment_status", "designation", "employer_name",
+        "skills", "certifications", "training_hours", "assessment_score"
+      ]
+    },
+    "EmploymentDeptOfficer": {
+      "visible_fields": ["*"]
+    },
+    "SkillDeptOfficer": {
+      "visible_fields": [
+        "name", "dob", "phone", "district",
+        "skills", "certifications", "training_hours", "assessment_score",
+        "employment_status", "designation", "employer_name"
+      ]
+    },
+    "RevenueDeptOfficer": {
+      "visible_fields": [
+        "name", "dob", "district",
+        "land_parcel_id", "tax_status", "outstanding_amount",
+        "last_assessment_date", "address"
+      ]
+    },
+    "GILService": {
+      "visible_fields": ["*"]
+    },
+    "Admin": {
+      "visible_fields": ["*"]
+    }
+  }
+}

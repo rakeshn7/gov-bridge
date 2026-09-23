@@ -1,0 +1,77 @@
+# Employment System → GIL Canonical Schema Mapping
+# SIH26129: Schema Mapping Engine config
+# Source: Employment REST API native JSON field names
+# Target: GIL canonical citizen schema field names
+
+system: employment
+version: 1
+
+fields:
+  # Identity
+  - source: emp_id
+    target: system_identifier
+    type: string
+
+  # Personal
+  - source: full_name
+    target: name
+    type: string
+
+  - source: date_of_birth
+    target: dob
+    type: date
+    transform: date_format
+    params:
+      from: "%d/%m/%Y"     # Employment system uses DD/MM/YYYY
+      to: "ISO8601"        # GIL canonical uses YYYY-MM-DD
+
+  - source: mobile_no
+    target: phone
+    type: string
+
+  - source: email_address
+    target: email
+    type: string
+
+  - source: district
+    target: district
+    type: string
+
+  - source: state
+    target: state
+    type: string
+
+  # Employment-specific fields
+  - source: employment_status
+    target: employment_status
+    type: string
+
+  - source: department_code
+    target: dept_code
+    type: string
+
+  - source: designation
+    target: designation
+    type: string
+
+  - source: joining_date
+    target: joining_date
+    type: date
+    transform: date_format
+    params:
+      from: "%d/%m/%Y"
+      to: "ISO8601"
+
+  - source: monthly_salary
+    target: monthly_income
+    type: float
+
+  - source: employer_name
+    target: employer_name
+    type: string
+
+  # Security — Aadhaar reference is hashed before entering canonical layer
+  - source: aadhaar_ref
+    target: aadhaar_hash
+    type: string
+    transform: hash_sha256

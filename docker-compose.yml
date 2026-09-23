@@ -1,0 +1,147 @@
+version: "3.9"
+
+# SIH26129 — Government Interoperability Framework
+# 6 services: postgres, redis, gil-core, mock-employment, mock-skill, frontend
+# Prometheus metrics are scraped from gil-core /metrics endpoint (no separate Prometheus container)
+
+services:
+  # ─── Data Layer ────────────────────────────────────────────────────────────
+  postgres:
+    image: postgres:15-alpine
+    container_name: gil-postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-gil}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-gilpassword}
+      POSTGRES_DB: ${POSTGRES_DB:-gildb}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./infra/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-gil} -d ${POSTGRES_DB:-gildb}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    container_name: gil-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - ./infra/redis/redis.conf:/usr/local/etc/redis/redis.conf:ro
+      - redis_data:/data
+    command: redis-server /usr/local/etc/redis/redis.conf
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    restart: unless-stopped
+
+  # ─── Mock Departmental Systems ─────────────────────────────────────────────
+  mock-employment:
+    build:
+      context: ./mock-employment-system
+      dockerfile: Dockerfile
+    container_name: gil-mock-employment
+    ports:
+      - "8001:8001"
+    environment:
+      SERVICE_JWT_SECRET: ${SERVICE_JWT_SECRET:-service-secret-key-dev}
+      PORT: "8001"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8001/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped
+
+  mock-skill:
+    build:
+      context: ./mock-skill-system
+      dockerfile: Dockerfile
+    container_name: gil-mock-skill
+    ports:
+      - "8002:8002"
+    environment:
+      SERVICE_JWT_SECRET: ${SERVICE_JWT_SECRET:-service-secret-key-dev}
+      PORT: "8002"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8002/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped
+
+  # ─── GIL Core Middleware ────────────────────────────────────────────────────
+  gil-core:
+    build:
+      context: ./gil-core
+      dockerfile: Dockerfile
+    container_name: gil-core
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-gil}:${POSTGRES_PASSWORD:-gilpassword}@postgres:5432/${POSTGRES_DB:-gildb}
+      REDIS_URL: redis://redis:6379/0
+      JWT_SECRET: ${JWT_SECRET:-changeme-supersecret-jwt-key-32chars}
+      JWT_ISSUER: ${JWT_ISSUER:-gil-auth}
+      JWT_ALGORITHM: ${JWT_ALGORITHM:-HS256}
+      ACCESS_TOKEN_EXPIRE_MINUTES: ${ACCESS_TOKEN_EXPIRE_MINUTES:-30}
+      SERVICE_JWT_SECRET: ${SERVICE_JWT_SECRET:-service-secret-key-dev}
+      EMPLOYMENT_API_URL: http://mock-employment:8001
+      SKILL_API_URL: http://mock-skill:8002
+      OAUTH_CLIENT_ID: ${OAUTH_CLIENT_ID:-citizen-app}
+      OAUTH_CLIENT_SECRET: ${OAUTH_CLIENT_SECRET:-citizen-secret}
+      RETRY_INITIAL_DELAY: ${RETRY_INITIAL_DELAY:-2}
+      RETRY_BACKOFF_FACTOR: ${RETRY_BACKOFF_FACTOR:-2}
+      RETRY_MAX_ATTEMPTS: ${RETRY_MAX_ATTEMPTS:-3}
+      TIMEOUT_PER_SYSTEM: ${TIMEOUT_PER_SYSTEM:-10}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:3000}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      mock-employment:
+        condition: service_healthy
+      mock-skill:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8000/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+    restart: unless-stopped
+
+  # ─── Frontend Dashboard ─────────────────────────────────────────────────────
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: gil-frontend
+    ports:
+      - "3000:3000"
+    environment:
+      NEXT_PUBLIC_GIL_API_URL: ${NEXT_PUBLIC_GIL_API_URL:-http://localhost:8000}
+    depends_on:
+      gil-core:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+    name: gil_postgres_data
+  redis_data:
+    name: gil_redis_data
+
+networks:
+  default:
+    name: gil-network
+    driver: bridge

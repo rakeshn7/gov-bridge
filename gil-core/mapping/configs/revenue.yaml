@@ -1,0 +1,35 @@
+# Revenue Registry → GIL Canonical Schema Mapping
+# SIH26129: Schema Mapping Engine config
+# Source: Revenue Postgres table column names (as returned by DbAdapter)
+# Target: GIL canonical citizen schema
+
+system: revenue
+version: 1
+
+fields:
+  # Identity
+  - source: revenue_id
+    target: system_identifier
+    type: string
+
+  # Revenue-specific fields
+  - source: land_parcel_id
+    target: land_parcel_id
+    type: string
+
+  - source: tax_status
+    target: tax_status
+    type: string
+
+  - source: outstanding_amount
+    target: outstanding_amount
+    type: float
+
+  - source: last_assessment_date
+    target: last_assessment_date
+    type: date
+    # Revenue DB stores as ISO date already — no transform needed
+
+  - source: address
+    target: address
+    type: string

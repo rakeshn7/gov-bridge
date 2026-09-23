@@ -1,0 +1,47 @@
+# ─── Government of Maharashtra Scheme Workflow Definitions ────────────────────
+# SIH26129 Component: Configurable Workflow Orchestration Engine
+
+schemes:
+  citizen_360:
+    id: "citizen_360"
+    name: "Comprehensive Citizen 360-Degree Profile Verification"
+    department: "General Administration & Citizen Services"
+    description: "Full cross-departmental master reconciliation across Employment, Vocational Skills, and Land Revenue registries."
+    categories: ["employment", "skills", "revenue"]
+    default_purpose: "comprehensive_citizen_verification"
+    sla_target_seconds: 2.0
+    execution_mode: "parallel_fan_out"
+    mandatory_systems: ["employment", "skill", "revenue"]
+
+  cmegp:
+    id: "cmegp"
+    name: "Chief Minister Employment Generation Programme (CMEGP)"
+    department: "Industries, Energy and Labour Department"
+    description: "Verifies citizen employment status, prior business registration, and land assets for micro-enterprise credit subsidy."
+    categories: ["employment", "revenue"]
+    default_purpose: "cmegp_credit_subsidy_verification"
+    sla_target_seconds: 1.5
+    execution_mode: "parallel_fan_out"
+    mandatory_systems: ["employment", "revenue"]
+
+  pramod_mahajan:
+    id: "pramod_mahajan"
+    name: "Pramod Mahajan Kaushalya Scheme (PMKSD)"
+    department: "Skills, Employment, Entrepreneurship & Innovation"
+    description: "Evaluates NSDC/MSSDS vocational training completion and employment placement status for stipend release."
+    categories: ["skills", "employment"]
+    default_purpose: "vocational_placement_stipend_release"
+    sla_target_seconds: 1.5
+    execution_mode: "parallel_fan_out"
+    mandatory_systems: ["skill", "employment"]
+
+  revenue_clearance:
+    id: "revenue_clearance"
+    name: "Maha-Bhulekh Land Revenue & Dues Clearance"
+    department: "Revenue and Forest Department"
+    description: "Reconciles land parcel records and property tax dues directly against core district cadastral databases."
+    categories: ["revenue"]
+    default_purpose: "land_revenue_dues_clearance"
+    sla_target_seconds: 1.0
+    execution_mode: "parallel_fan_out"
+    mandatory_systems: ["revenue"]
