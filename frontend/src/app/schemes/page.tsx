@@ -22,7 +22,7 @@ export default function SchemesPage() {
         boxShadow: '0 4px 12px rgba(15, 46, 89, 0.15)',
       }}>
         <div style={{ fontSize: 12, textTransform: 'uppercase', letterSpacing: '1px', opacity: 0.9, fontWeight: 700 }}>
-          Maharashtra State Government Scheme Workflows
+          Government Scheme Workflows
         </div>
         <h1 style={{ fontFamily: 'var(--font-serif)', fontSize: 24, fontWeight: 800, marginTop: 4 }}>
           📑 Government Schemes Directory & RTS Act SLA Benchmark

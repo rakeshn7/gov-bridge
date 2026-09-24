@@ -23,16 +23,16 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <div className="gov-topbar">
           <div className="gov-topbar-inner">
             <div className="gov-topbar-left">
-              <span>Government of Maharashtra</span>
+              <span>Government</span>
               <span style={{ opacity: 0.5 }}>|</span>
               <span>Department of Skills, Employment, Entrepreneurship and Innovation</span>
             </div>
             <div className="gov-topbar-right">
               <span>Screen Reader Access</span>
               <span style={{ opacity: 0.5 }}>|</span>
-              <button className="gov-topbar-btn" title="Decrease font size">A-</button>
-              <button className="gov-topbar-btn" title="Standard font size">A</button>
-              <button className="gov-topbar-btn" title="Increase font size">A+</button>
+              <button type="button" suppressHydrationWarning className="gov-topbar-btn" title="Decrease font size">A-</button>
+              <button type="button" suppressHydrationWarning className="gov-topbar-btn" title="Standard font size">A</button>
+              <button type="button" suppressHydrationWarning className="gov-topbar-btn" title="Increase font size">A+</button>
               <span style={{ opacity: 0.5 }}>|</span>
               <span style={{ fontWeight: 600 }}>English</span>
             </div>

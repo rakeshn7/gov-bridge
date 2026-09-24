@@ -34,7 +34,7 @@ export default function DepartmentsPage() {
           Open Government Data (OGD) Platform & Departmental Catalog
         </div>
         <h1 style={{ fontFamily: 'var(--font-serif)', fontSize: 24, fontWeight: 800, marginTop: 4 }}>
-          🏢 Maharashtra Integrated Departmental Registries Explorer
+          🏢 Government Integrated Departmental Registries Explorer
         </h1>
         <p style={{ fontSize: 13, opacity: 0.9, marginTop: 6, maxWidth: 850, lineHeight: 1.5 }}>
           Directly inspect native records, dataset schemas, and legacy identifiers across all 8 integrated state and national departmental systems (Aadhaar, PAN, DigiLocker, Education, UDID Disability, Employment, Skills, and Land Revenue).

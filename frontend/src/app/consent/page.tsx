@@ -51,7 +51,7 @@ export default function ConsentPage() {
           🛡️ Citizen Privacy & Consent Management Portal
         </h1>
         <p style={{ fontSize: 13.5, opacity: 0.9, marginTop: 6, maxWidth: 800, lineHeight: 1.5 }}>
-          As a citizen of Maharashtra, you hold full legal authority to grant, inspect, or revoke real-time data access permissions to government departments. GIL enforces <strong>consent-gated adapter execution</strong> — if consent is revoked, department adapters are blocked prior to data retrieval.
+          As a citizen, you hold full legal authority to grant, inspect, or revoke real-time data access permissions to government departments. GIL enforces <strong>consent-gated adapter execution</strong> — if consent is revoked, department adapters are blocked prior to data retrieval.
         </p>
       </div>
 

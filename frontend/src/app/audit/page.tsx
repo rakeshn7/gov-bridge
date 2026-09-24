@@ -68,6 +68,7 @@ export default function AuditPage() {
             <label className="form-label">Search by Request ID, Action, or Actor</label>
             <input
               className="form-input"
+              suppressHydrationWarning
               value={filterQuery}
               onChange={e => setFilterQuery(e.target.value)}
               placeholder="e.g. REQ-20260923 / SkillDeptOfficer / GIL_REQUEST_SUBMITTED..."
@@ -77,6 +78,7 @@ export default function AuditPage() {
             <label className="form-label">Filter by Requesting Actor Role</label>
             <select
               className="form-select"
+              suppressHydrationWarning
               value={selectedActor}
               onChange={e => setSelectedActor(e.target.value)}
             >
