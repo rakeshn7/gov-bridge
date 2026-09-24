@@ -1,0 +1,22 @@
+system_name: aadhaar
+protocol: rest
+base_url: ${AADHAAR_API_URL:http://localhost:8000/mock/aadhaar}
+timeout_seconds: 10
+
+auth:
+  type: bearer
+  token_env: SERVICE_JWT_SECRET
+
+endpoint: /verify/{identifier}
+method: GET
+
+field_mappings:
+  aadhaar_number: aadhaar_id
+  enrolment_id: enrolment_no
+  state: state_name
+  district: district_name
+  sub_district: sub_district
+  vtc: village_town_city
+  ekyc_verified: is_ekyc_verified
+  verification_method: auth_method
+  linked_mobile: mobile_masked
