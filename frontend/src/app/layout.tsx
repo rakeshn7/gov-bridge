@@ -3,9 +3,9 @@ import Link from 'next/link'
 import './globals.css'
 
 export const metadata: Metadata = {
-  title: 'Government Interoperability Layer (GIL) — Government of Maharashtra',
-  description: 'Government of Maharashtra — Department of Skills, Employment, Entrepreneurship & Innovation (SIH26129)',
-  keywords: ['Government of Maharashtra', 'Interoperability', 'GIL', 'SIH26129', 'Citizen Portal', 'Aadhaar', 'UDID', 'DigiLocker'],
+  title: 'GovBridge — Government Interoperability Layer (GIL) — Government of Maharashtra',
+  description: 'GovBridge — Government of Maharashtra — Department of Skills, Employment, Entrepreneurship & Innovation (SIH26129)',
+  keywords: ['GovBridge', 'Government of Maharashtra', 'Interoperability', 'GIL', 'SIH26129', 'Citizen Portal', 'Aadhaar', 'UDID', 'DigiLocker'],
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -51,7 +51,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                   Government of Maharashtra
                 </div>
                 <div className="gov-title-english">
-                  Government Interoperability Layer (GIL)
+                  GovBridge — Government Interoperability Layer (GIL)
                 </div>
                 <div className="gov-subtitle-dept">
                   Department of Skills, Employment, Entrepreneurship & Innovation
@@ -101,7 +101,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <div className="gov-notice-banner">
             <span className="gov-notice-tag">IMPORTANT NOTICE</span>
             <span>
-              This is the official demonstration platform for the Government Interoperability Layer (GIL) brownfield integration connecting 8 departmental registries (Aadhaar, PAN, DigiLocker, Education, UDID Disability, Employment, Skills, and Revenue).
+              This is the official demonstration platform for <strong>GovBridge</strong> — Government Interoperability Layer (GIL) brownfield integration connecting 8 departmental registries (Aadhaar, PAN, DigiLocker, Education, UDID Disability, Employment, Skills, and Revenue).
             </span>
           </div>
 
@@ -113,7 +113,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <div className="gov-footer-inner">
             <div className="gov-footer-grid">
               <div>
-                <div className="gov-footer-title">Government Interoperability Layer (GIL)</div>
+                <div className="gov-footer-title">GovBridge — Government Interoperability Layer (GIL)</div>
                 <p style={{ lineHeight: 1.6, color: '#94a3b8', fontSize: 12 }}>
                   A unified middleware platform built for the Government of Maharashtra, Department of Skills, Employment, Entrepreneurship & Innovation to integrate siloed legacy departmental registries using federated identity (MDM), citizen consent management (DPDP Act), and RBAC security enforcement.
                 </p>

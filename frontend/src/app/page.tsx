@@ -90,7 +90,7 @@ export default function HomePage() {
       <div className="page-header">
         <h1 className="page-title">🏛️ Citizen Data Consolidation & Scheme Eligibility Portal</h1>
         <p className="page-subtitle">
-          Government of Maharashtra · Government Interoperability Layer (GIL) · Unified Multi-Department Integration Engine
+          Government of Maharashtra · GovBridge — Government Interoperability Layer (GIL) · Unified Multi-Department Integration Engine
         </p>
       </div>
 

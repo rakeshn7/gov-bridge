@@ -1,0 +1,16 @@
+system_name: digilocker
+protocol: rest
+base_url: ${DIGILOCKER_API_URL:http://localhost:8000/mock/digilocker}
+timeout_seconds: 10
+
+auth:
+  type: bearer
+  token_env: SERVICE_JWT_SECRET
+
+endpoint: /credentials/{identifier}
+method: GET
+
+field_mappings:
+  account_id: digilocker_id
+  linked_documents_count: doc_count
+  issued_documents: documents

@@ -1,0 +1,19 @@
+system_name: udid
+protocol: rest
+base_url: ${UDID_API_URL:http://localhost:8000/mock/udid}
+timeout_seconds: 10
+
+auth:
+  type: bearer
+  token_env: SERVICE_JWT_SECRET
+
+endpoint: /disability/{identifier}
+method: GET
+
+field_mappings:
+  udid_card_no: udid_id
+  disability_type: type
+  disability_percentage: severity_percent
+  validity: status_validity
+  issuing_authority: medical_board
+  pension_eligibility: dbt_eligibility

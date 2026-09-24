@@ -1,0 +1,19 @@
+system_name: pan
+protocol: rest
+base_url: ${PAN_API_URL:http://localhost:8000/mock/pan}
+timeout_seconds: 10
+
+auth:
+  type: bearer
+  token_env: SERVICE_JWT_SECRET
+
+endpoint: /verify/{identifier}
+method: GET
+
+field_mappings:
+  pan_number: pan_id
+  name_on_card: full_name
+  taxpayer_category: category
+  aadhaar_seeding_status: aadhaar_linked
+  tax_filing_status: filing_status
+  income_tier: income_bracket

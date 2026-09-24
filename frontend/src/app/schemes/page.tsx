@@ -28,7 +28,7 @@ export default function SchemesPage() {
           📑 Government Schemes Directory & RTS Act SLA Benchmark
         </h1>
         <p style={{ fontSize: 13, opacity: 0.9, marginTop: 6, maxWidth: 850, lineHeight: 1.5 }}>
-          The Government Interoperability Layer (GIL) standardizes statutory verification rules for state and central government schemes, guaranteeing compliance with the <strong>Maharashtra Right to Public Services Act 2015</strong> through automated sub-second cross-departmental verification.
+          GovBridge (Government Interoperability Layer - GIL) standardizes statutory verification rules for state and central government schemes, guaranteeing compliance with the <strong>Maharashtra Right to Public Services Act 2015</strong> through automated sub-second cross-departmental verification.
         </p>
       </div>
 
