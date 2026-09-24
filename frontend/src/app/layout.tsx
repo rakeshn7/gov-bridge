@@ -5,7 +5,7 @@ import './globals.css'
 export const metadata: Metadata = {
   title: 'Government Interoperability Layer (GIL) — Government of Maharashtra',
   description: 'Government of Maharashtra — Department of Skills, Employment, Entrepreneurship & Innovation (SIH26129)',
-  keywords: ['Government of Maharashtra', 'Interoperability', 'GIL', 'SIH26129', 'Citizen Portal'],
+  keywords: ['Government of Maharashtra', 'Interoperability', 'GIL', 'SIH26129', 'Citizen Portal', 'Aadhaar', 'UDID', 'DigiLocker'],
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -71,14 +71,23 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           </div>
         </header>
 
-        {/* Official Navigation Bar */}
+        {/* Official Navigation Bar with 7 Page Links */}
         <nav className="gov-navbar">
           <div className="gov-navbar-inner">
             <Link href="/" className="gov-nav-link">
-              <span>🏛️</span> Citizen Services
+              <span>🏛️</span> Citizen Portal
+            </Link>
+            <Link href="/departments" className="gov-nav-link">
+              <span>🏢</span> Departmental Registries
+            </Link>
+            <Link href="/consent" className="gov-nav-link">
+              <span>🛡️</span> Consent Manager
             </Link>
             <Link href="/audit" className="gov-nav-link">
               <span>📋</span> Audit Register
+            </Link>
+            <Link href="/schemes" className="gov-nav-link">
+              <span>📑</span> Scheme Directory
             </Link>
             <Link href="/admin" className="gov-nav-link">
               <span>⚙️</span> Admin Console
@@ -92,7 +101,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <div className="gov-notice-banner">
             <span className="gov-notice-tag">IMPORTANT NOTICE</span>
             <span>
-              This is the official demonstration platform for the Government Interoperability Layer (GIL) brownfield integration between Employment, Skill Development, and Land Revenue registries.
+              This is the official demonstration platform for the Government Interoperability Layer (GIL) brownfield integration connecting 8 departmental registries (Aadhaar, PAN, DigiLocker, Education, UDID Disability, Employment, Skills, and Revenue).
             </span>
           </div>
 
@@ -106,7 +115,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <div>
                 <div className="gov-footer-title">Government Interoperability Layer (GIL)</div>
                 <p style={{ lineHeight: 1.6, color: '#94a3b8', fontSize: 12 }}>
-                  A unified middleware platform built for the Government of Maharashtra, Department of Skills, Employment, Entrepreneurship & Innovation to integrate siloed legacy departmental registries using federated identity (MDM), citizen consent management, and RBAC security enforcement.
+                  A unified middleware platform built for the Government of Maharashtra, Department of Skills, Employment, Entrepreneurship & Innovation to integrate siloed legacy departmental registries using federated identity (MDM), citizen consent management (DPDP Act), and RBAC security enforcement.
                 </p>
                 <div style={{ marginTop: 12, fontSize: 11.5, color: '#64748b' }}>
                   Smart India Hackathon 2026 (SIH26129) · Developed by Team GenZCoders
@@ -115,27 +124,26 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
               <div>
                 <div className="gov-footer-title">Official Portals</div>
-                <ul className="gov-footer-links">
-                  <li><a href="https://maharashtra.gov.in" target="_blank" rel="noopener noreferrer">Maharashtra State Portal</a></li>
-                  <li><a href="https://rojgar.mahaswayam.gov.in" target="_blank" rel="noopener noreferrer">MahaSwayam Employment Portal</a></li>
-                  <li><a href="https://aaplesarkar.mahaonline.gov.in" target="_blank" rel="noopener noreferrer">Aaple Sarkar Citizen Services</a></li>
-                  <li><a href="https://india.gov.in" target="_blank" rel="noopener noreferrer">National Portal of India</a></li>
+                <ul className="gov-footer-links" style={{ listStyle: 'none', padding: 0, fontSize: 12, lineHeight: 1.8 }}>
+                  <li><a href="https://maharashtra.gov.in" target="_blank" rel="noopener noreferrer" style={{ color: '#cbd5e1', textDecoration: 'none' }}>Maharashtra State Portal</a></li>
+                  <li><a href="https://data.gov.in" target="_blank" rel="noopener noreferrer" style={{ color: '#cbd5e1', textDecoration: 'none' }}>Open Government Data (data.gov.in)</a></li>
+                  <li><a href="https://rojgar.mahaswayam.gov.in" target="_blank" rel="noopener noreferrer" style={{ color: '#cbd5e1', textDecoration: 'none' }}>MahaSwayam Employment Portal</a></li>
+                  <li><a href="https://swavlambancard.gov.in" target="_blank" rel="noopener noreferrer" style={{ color: '#cbd5e1', textDecoration: 'none' }}>UDID Disability Portal</a></li>
                 </ul>
               </div>
 
               <div>
                 <div className="gov-footer-title">Policies & Statutory Info</div>
-                <ul className="gov-footer-links">
-                  <li><a href="#terms">Terms & Conditions</a></li>
-                  <li><a href="#privacy">Privacy & Consent Policy</a></li>
-                  <li><a href="#hyperlink">Hyperlinking Policy</a></li>
-                  <li><a href="#audit">Immutable Audit Trail Compliance</a></li>
-                  <li><a href="#helpdesk">Support & Grievance Redressal</a></li>
+                <ul className="gov-footer-links" style={{ listStyle: 'none', padding: 0, fontSize: 12, lineHeight: 1.8 }}>
+                  <li><a href="#privacy" style={{ color: '#cbd5e1', textDecoration: 'none' }}>DPDP Act Consent Compliance</a></li>
+                  <li><a href="#audit" style={{ color: '#cbd5e1', textDecoration: 'none' }}>Immutable Audit Ledger</a></li>
+                  <li><a href="#rts" style={{ color: '#cbd5e1', textDecoration: 'none' }}>Right to Services Act (RTS 2015)</a></li>
+                  <li><a href="#gigw" style={{ color: '#cbd5e1', textDecoration: 'none' }}>GIGW 3.0 Web Accessibility</a></li>
                 </ul>
               </div>
             </div>
 
-            <div className="gov-footer-bottom">
+            <div className="gov-footer-bottom" style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11.5, color: '#64748b', paddingTop: 16 }}>
               <div>
                 © 2026 Government of Maharashtra. All rights reserved. Content owned & maintained by Dept. of Skills, Employment, Entrepreneurship & Innovation.
               </div>

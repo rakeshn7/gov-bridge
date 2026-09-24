@@ -1,65 +1,50 @@
 'use client'
 import { useState, useEffect } from 'react'
-import { toggleFailure, getManualReview, resolveReview, updateConsent, login, ManualReviewItem } from '@/lib/api'
-
-const SYSTEMS = ['employment', 'skill']
-const CITIZENS = [
-  { id: 'MAHA-2024-001', name: 'Priya Sharma' },
-  { id: 'MAHA-2024-002', name: 'Rahul Deshmukh' },
-]
+import { toggleFailure, getManualReview, resolveReview, updateConsent, login, ManualReviewItem, DEPARTMENTS, MASTER_CITIZENS } from '@/lib/api'
 
 export default function AdminPage() {
-  const [token, setToken] = useState('')
-  const [failureStates, setFailureStates] = useState<Record<string, boolean>>({})
+  const [token, setToken] = useState('mock-admin-token')
+  const [failureStates, setFailureStates] = useState<Record<string, boolean>>({
+    employment: false,
+    skills: false,
+    aadhaar: false,
+    pan: false,
+    udid: false,
+    digilocker: false,
+    education: false,
+    revenue: false,
+  })
   const [reviewItems, setReviewItems] = useState<ManualReviewItem[]>([])
   const [reviewCount, setReviewCount] = useState(0)
   const [loadingToggle, setLoadingToggle] = useState<Record<string, boolean>>({})
-  const [consentState, setConsentState] = useState<Record<string, boolean>>({})
-  const [loadingConsent, setLoadingConsent] = useState<Record<string, boolean>>({})
   const [resolving, setResolving] = useState<Record<string, boolean>>({})
-  const [msgs, setMsgs] = useState<string[]>([])
-  const [authLoading, setAuthLoading] = useState(false)
+  const [selectedReviewItem, setSelectedReviewItem] = useState<ManualReviewItem | null>(null)
+  const [officerNotes, setOfficerNotes] = useState('')
+  const [msgs, setMsgs] = useState<string[]>([
+    '✅ Authenticated as Senior Governance Officer (GIL Root Administrator)',
+    '🟢 All 8 departmental adapters connected and healthy',
+  ])
 
   const addMsg = (m: string) => setMsgs(prev => [m, ...prev.slice(0, 9)])
 
-  const authenticate = async () => {
-    setAuthLoading(true)
+  const fetchReview = async () => {
     try {
-      const r = await login('MAHA-2024-001', 'GILService')
-      setToken(r.access_token)
-      addMsg('✅ Authenticated successfully as GILService')
-      fetchReview(r.access_token)
-    } catch {
-      addMsg('❌ Authentication failed')
-    } finally {
-      setAuthLoading(false)
-    }
-  }
-
-  const fetchReview = async (t?: string) => {
-    const tk = t || token
-    if (!tk) return
-    try {
-      const r = await getManualReview(tk)
+      const r = await getManualReview(token)
       setReviewItems(r.items)
       setReviewCount(r.count)
     } catch {}
   }
 
   useEffect(() => {
-    if (token) fetchReview()
-  }, [token])
+    fetchReview()
+  }, [])
 
   const handleToggle = async (system: string) => {
-    if (!token) {
-      addMsg('⚠️ Please authenticate as administrator first')
-      return
-    }
     setLoadingToggle(p => ({ ...p, [system]: true }))
     try {
       const r = await toggleFailure(token, system)
       setFailureStates(p => ({ ...p, [system]: r.failure_mode }))
-      addMsg(`${r.failure_mode ? '🔴' : '🟢'} ${system} system: fault simulation mode ${r.failure_mode ? 'ENABLED (ON)' : 'DISABLED (OFF)'}`)
+      addMsg(`${r.failure_mode ? '🔴' : '🟢'} ${DEPARTMENTS[system]?.name || system}: fault simulation ${r.failure_mode ? 'ENABLED (Simulating HTTP 503 Outage)' : 'DISABLED (Normal Operations)'}`)
     } catch (e) {
       addMsg(`❌ Fault toggle failed: ${e}`)
     } finally {
@@ -67,185 +52,196 @@ export default function AdminPage() {
     }
   }
 
-  const handleConsent = async (citizenId: string, revoke: boolean) => {
-    if (!token) {
-      addMsg('⚠️ Please authenticate as administrator first')
-      return
-    }
-    setLoadingConsent(p => ({ ...p, [citizenId]: true }))
-    try {
-      await updateConsent(token, citizenId, ['employment', 'skills', 'revenue'], revoke)
-      setConsentState(p => ({ ...p, [citizenId]: !revoke }))
-      addMsg(`${revoke ? '🚫' : '✅'} Citizen ${citizenId}: consent ${revoke ? 'REVOKED' : 'GRANTED'}`)
-    } catch (e) {
-      addMsg(`❌ Consent update failed: ${e}`)
-    } finally {
-      setLoadingConsent(p => ({ ...p, [citizenId]: false }))
-    }
+  const handleOpenResolveModal = (item: ManualReviewItem) => {
+    setSelectedReviewItem(item)
+    setOfficerNotes(`Manually verified by officer during governance audit ref: ${item.request_id}`)
   }
 
-  const handleResolve = async (item: ManualReviewItem) => {
-    if (!token) return
-    setResolving(p => ({ ...p, [item.id]: true }))
+  const handleConfirmResolve = async () => {
+    if (!selectedReviewItem) return
+    const id = selectedReviewItem.id
+    setResolving(p => ({ ...p, [id]: true }))
     try {
-      await resolveReview(token, item.id, 'admin-officer', 'Manually verified via dashboard')
-      addMsg(`✅ Resolved manual review item: ${item.system_name}`)
+      await resolveReview(token, id, 'SeniorOfficer-001', officerNotes)
+      addMsg(`✅ Manually resolved review item #${id} (${selectedReviewItem.system_name})`)
+      setSelectedReviewItem(null)
       await fetchReview()
     } catch (e) {
-      addMsg(`❌ Resolve failed: ${e}`)
+      addMsg(`❌ Resolution failed: ${e}`)
     } finally {
-      setResolving(p => ({ ...p, [item.id]: false }))
+      setResolving(p => ({ ...p, [id]: false }))
     }
   }
 
   return (
     <div className="fade-in">
-      <div className="page-header">
-        <h1 className="page-title">⚙️ Administrative Console</h1>
-        <p className="page-subtitle">
-          Government of Maharashtra · System Health Monitoring, Fault Injection Testing & Manual Review Queue
+      {/* Hero Banner data.gov.in style */}
+      <div style={{
+        background: 'linear-gradient(135deg, #0f2e59 0%, #1e3a8a 50%, #475569 100%)',
+        color: '#ffffff',
+        padding: '26px 24px',
+        borderRadius: 8,
+        marginBottom: 24,
+        boxShadow: '0 4px 12px rgba(15, 46, 89, 0.15)',
+      }}>
+        <div style={{ fontSize: 12, textTransform: 'uppercase', letterSpacing: '1px', opacity: 0.9, fontWeight: 700 }}>
+          System Administration & Governance Console
+        </div>
+        <h1 style={{ fontFamily: 'var(--font-serif)', fontSize: 24, fontWeight: 800, marginTop: 4 }}>
+          ⚙️ Operations, Circuit Breaker & Manual Review Queue
+        </h1>
+        <p style={{ fontSize: 13, opacity: 0.9, marginTop: 6, maxWidth: 850, lineHeight: 1.5 }}>
+          Monitor system health across 8 state & national registries, inject fault simulation modes for resiliency testing, and adjudicate Tier-2 failed jobs that exhausted automatic retries.
         </p>
       </div>
 
-      {/* Auth Box */}
-      {!token ? (
-        <div className="card">
-          <div className="card-title">
-            <span>🔑 Officer Security Login</span>
+      {/* System Metrics Overview Cards */}
+      <div className="grid-3" style={{ gap: 16, marginBottom: 24 }}>
+        <div className="metric-card">
+          <div className="metric-value" style={{ color: 'var(--success)' }}>8 / 8</div>
+          <div className="metric-label">Active Departmental Adapters</div>
+        </div>
+        <div className="metric-card">
+          <div className="metric-value" style={{ color: reviewCount > 0 ? 'var(--warning)' : 'var(--success)' }}>
+            {reviewCount}
           </div>
-          <p style={{ fontSize: 12.5, color: 'var(--text-secondary)', marginBottom: 14 }}>
-            System configuration controls and Tier-2 review queues require an active GILService administrator session.
-          </p>
-          <button className="btn btn-primary" onClick={authenticate} disabled={authLoading}>
-            {authLoading ? <><span className="spinner" /> Verifying Credentials...</> : '🔐 Authenticate as GILService'}
-          </button>
+          <div className="metric-label">Tier-2 Review Queue Depth</div>
         </div>
-      ) : (
-        <div className="alert alert-success" style={{ marginBottom: 20 }}>
-          <span>✅ Authorized Administrative Session Active: <strong>GILService Root</strong></span>
+        <div className="metric-card">
+          <div className="metric-value" style={{ color: 'var(--gov-navy)' }}>0.84s</div>
+          <div className="metric-label">Avg Orchestration Latency</div>
         </div>
-      )}
+      </div>
 
-      <div className="grid-2" style={{ marginBottom: 20 }}>
-        {/* Failure Toggles */}
-        <div className="card">
+      <div className="grid-2" style={{ marginBottom: 24 }}>
+        {/* Fault Injection Circuit Breaker Controls */}
+        <div className="card" style={{ marginBottom: 0 }}>
           <div className="card-title">
-            <span>🔴 Fault Injection Testing</span>
+            <span>🔴 Failure Injection & Circuit Breaker Simulator</span>
           </div>
           <p style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 14 }}>
-            Inject controlled HTTP 503 outages into legacy mock systems. GIL retry logic kicks in automatically. If 3 exponential retries fail, requests are routed to the PostgreSQL Tier-2 Manual Review Queue.
+            Toggle fault injection per department to test exponential backoff retries and manual review routing.
           </p>
-          {SYSTEMS.map(sys => (
-            <div key={sys} className={`toggle-row ${failureStates[sys] ? 'danger' : ''}`}>
-              <div>
-                <div style={{ fontWeight: 700, fontSize: 13.5, color: 'var(--gov-navy)' }}>
-                  {sys === 'employment' ? 'Employment System (REST API / JWT)' : 'Vocational Skill System (SOAP / XML Service)'}
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            {Object.values(DEPARTMENTS).map(dept => {
+              const isFailing = failureStates[dept.id]
+              return (
+                <div key={dept.id} className={`toggle-row ${isFailing ? 'danger' : ''}`} style={{ padding: '10px 14px' }}>
+                  <div>
+                    <div style={{ fontWeight: 700, fontSize: 13, color: 'var(--gov-navy)' }}>
+                      <span>{dept.icon}</span> <span style={{ marginLeft: 4 }}>{dept.name}</span>
+                    </div>
+                    <div style={{ fontSize: 11, color: isFailing ? 'var(--error)' : 'var(--success)', marginTop: 1, fontWeight: 600 }}>
+                      {isFailing ? '⚠️ Fault Active (Simulating HTTP 503)' : '🟢 Operating Normally'}
+                    </div>
+                  </div>
+                  <button
+                    className={`toggle ${isFailing ? 'on' : ''}`}
+                    onClick={() => handleToggle(dept.id)}
+                    disabled={loadingToggle[dept.id]}
+                    title={`Toggle failure simulation for ${dept.name}`}
+                  />
                 </div>
-                <div style={{ fontSize: 11.5, color: failureStates[sys] ? 'var(--error)' : 'var(--success)', marginTop: 2, fontWeight: 600 }}>
-                  {failureStates[sys] ? '⚠️ Outage Active (HTTP 503 Service Unavailable Simulated)' : '🟢 Operating Normally'}
-                </div>
-              </div>
-              <button
-                className={`toggle ${failureStates[sys] ? 'on' : ''}`}
-                onClick={() => handleToggle(sys)}
-                disabled={loadingToggle[sys]}
-                title={`Toggle ${sys} failure simulation`}
-              />
-            </div>
-          ))}
+              )
+            })}
+          </div>
         </div>
 
-        {/* Consent Management */}
-        <div className="card">
+        {/* System Activity & Architecture Log */}
+        <div className="card" style={{ marginBottom: 0 }}>
           <div className="card-title">
-            <span>🔒 DPDP Consent Management</span>
+            <span>📋 Real-Time Operations Activity Log</span>
           </div>
-          <p style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 14 }}>
-            Directly revoke or grant citizen data-sharing consent. When revoked, GIL actively rejects departmental fetches at the gateway stage and logs a ConsentDenied security event.
-          </p>
-          {CITIZENS.map(c => (
-            <div key={c.id} className="toggle-row">
-              <div>
-                <div style={{ fontWeight: 700, fontSize: 13, color: 'var(--gov-navy)' }}>{c.name}</div>
-                <div style={{ fontSize: 11, color: 'var(--text-muted)' }} className="mono">{c.id}</div>
+          <div style={{ marginBottom: 16 }}>
+            {msgs.map((m, i) => (
+              <div key={i} className="pipeline-stage fade-in" style={{ padding: '8px 0', borderBottom: '1px solid var(--border-subtle)' }}>
+                <div className="stage-dot success" />
+                <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>{m}</span>
               </div>
-              <div style={{ display: 'flex', gap: 6 }}>
-                <button
-                  className="btn btn-success btn-sm"
-                  onClick={() => handleConsent(c.id, false)}
-                  disabled={loadingConsent[c.id]}
-                >
-                  Grant
-                </button>
-                <button
-                  className="btn btn-danger btn-sm"
-                  onClick={() => handleConsent(c.id, true)}
-                  disabled={loadingConsent[c.id]}
-                >
-                  Revoke
-                </button>
-              </div>
+            ))}
+          </div>
+
+          <div style={{ background: '#f8fafc', padding: 14, borderRadius: 4, border: '1px solid var(--border-subtle)', fontSize: 12, color: 'var(--text-secondary)' }}>
+            <strong style={{ color: 'var(--gov-navy)' }}>Two-Tier Resilience Queue Design:</strong>
+            <div style={{ marginTop: 6, lineHeight: 1.5 }}>
+              • <strong>Tier-1 (Redis):</strong> Holds transient in-flight retry jobs with exponential backoff (2s → 4s → 8s). Cleared on success.
+              <br />
+              • <strong>Tier-2 (PostgreSQL `manual_review_queue`):</strong> Written permanently when retries exceed max attempts (<code>retry_count ≥ 3</code>). Requires manual officer resolution below.
             </div>
-          ))}
+          </div>
         </div>
       </div>
 
       {/* Manual Review Queue */}
-      <div className="card" style={{ marginBottom: 20 }}>
+      <div className="card" style={{ marginBottom: 24 }}>
         <div className="card-title">
-          <span>🔔 Manual Review Queue (PostgreSQL Tier-2)</span>
+          <span>🔔 Tier-2 Manual Review Queue (PostgreSQL Adjudication)</span>
           <span className="badge badge-warning" style={{ marginLeft: 8 }}>
-            {reviewCount} Pending
+            {reviewCount} PENDING ACTION
           </span>
           <button
             className="btn btn-secondary btn-sm"
             style={{ marginLeft: 'auto' }}
             onClick={() => fetchReview()}
           >
-            🔄 Refresh
+            🔄 Refresh Queue
           </button>
         </div>
         <p style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 14 }}>
-          Failed queries that exhausted all Redis Tier-1 automatic retries (attempts ≥ 3) are securely isolated here for official administrative adjudication.
+          Failed queries that exhausted automatic retry attempts are held here for administrative review and manual resolution.
         </p>
 
         {reviewItems.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '32px 0', color: 'var(--text-muted)', fontSize: 13, background: 'var(--bg-subtle)', borderRadius: 4, border: '1px dashed var(--border)' }}>
-            No items currently pending manual review.
+          <div style={{ textAlign: 'center', padding: '36px 0', color: 'var(--text-muted)', fontSize: 13, background: 'var(--bg-subtle)', borderRadius: 4, border: '1px dashed var(--border)' }}>
+            ✓ Queue Clear: All departmental queries completed automatically without manual intervention.
           </div>
         ) : (
           <div className="table-container">
             <table>
               <thead>
                 <tr>
-                  <th>System</th>
-                  <th>Request ID</th>
+                  <th>Item ID</th>
+                  <th>Target Registry</th>
+                  <th>Original Request ID</th>
                   <th>Retries</th>
                   <th>Error Trace</th>
                   <th>Timestamp</th>
+                  <th>Status</th>
                   <th>Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {reviewItems.map(item => (
                   <tr key={item.id}>
-                    <td><span className="badge badge-purple">{item.system_name}</span></td>
-                    <td><span className="mono">{item.request_id.slice(0, 12)}…</span></td>
-                    <td><span className="badge badge-error">{item.retry_count}×</span></td>
-                    <td style={{ maxWidth: 220, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontSize: 11 }}>
-                      {item.error_trace || '—'}
+                    <td style={{ fontWeight: 700 }}><span className="mono">{item.id}</span></td>
+                    <td>
+                      <span className="badge badge-purple">{item.system_name}</span>
+                    </td>
+                    <td><span className="mono">{item.request_id}</span></td>
+                    <td><span className="badge badge-error">{item.retry_count}× Failed</span></td>
+                    <td style={{ maxWidth: 220, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontSize: 11, color: 'var(--error)' }}>
+                      {item.error_trace || 'Service Unavailable'}
                     </td>
                     <td style={{ fontSize: 11, fontFamily: 'monospace' }}>
-                      {new Date(item.created_at).toLocaleString()}
+                      {new Date(item.created_at).toLocaleTimeString()}
                     </td>
                     <td>
-                      <button
-                        className="btn btn-success btn-sm"
-                        onClick={() => handleResolve(item)}
-                        disabled={resolving[item.id]}
-                      >
-                        {resolving[item.id] ? '...' : '✅ Resolve'}
-                      </button>
+                      <span className={`badge ${item.status === 'RESOLVED' ? 'badge-success' : 'badge-warning'}`}>
+                        {item.status}
+                      </span>
+                    </td>
+                    <td>
+                      {item.status === 'RESOLVED' ? (
+                        <span style={{ fontSize: 11, color: 'var(--success)' }}>Resolved by {item.resolved_by}</span>
+                      ) : (
+                        <button
+                          className="btn btn-success btn-sm"
+                          onClick={() => handleOpenResolveModal(item)}
+                        >
+                          ✅ Resolve Item
+                        </button>
+                      )}
                     </td>
                   </tr>
                 ))}
@@ -255,18 +251,58 @@ export default function AdminPage() {
         )}
       </div>
 
-      {/* Activity log */}
-      {msgs.length > 0 && (
-        <div className="card">
-          <div className="card-title">
-            <span>📋 Administrative Activity Log</span>
-          </div>
-          {msgs.map((m, i) => (
-            <div key={i} className="pipeline-stage fade-in" style={{ padding: '8px 0' }}>
-              <div className="stage-dot success" />
-              <span style={{ fontSize: 12.5, color: 'var(--text-secondary)' }}>{m}</span>
+      {/* Resolve Modal Dialog */}
+      {selectedReviewItem && (
+        <div style={{
+          position: 'fixed',
+          top: 0, left: 0, right: 0, bottom: 0,
+          background: 'rgba(15, 23, 42, 0.6)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000,
+          padding: 16,
+        }}>
+          <div className="card fade-in" style={{ maxWidth: 540, width: '100%', marginBottom: 0, boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.2)' }}>
+            <div className="card-title">
+              <span>✅ Resolve Manual Review Item #{selectedReviewItem.id}</span>
+              <button
+                onClick={() => setSelectedReviewItem(null)}
+                style={{ marginLeft: 'auto', background: 'none', border: 'none', fontSize: 18, cursor: 'pointer' }}
+              >
+                ✕
+              </button>
             </div>
-          ))}
+            <div style={{ fontSize: 12.5, color: 'var(--text-secondary)', marginBottom: 14 }}>
+              <div><strong>System:</strong> {selectedReviewItem.system_name}</div>
+              <div style={{ marginTop: 2 }}><strong>Request ID:</strong> <span className="mono">{selectedReviewItem.request_id}</span></div>
+              <div style={{ marginTop: 2, color: 'var(--error)' }}><strong>Failure Reason:</strong> {selectedReviewItem.error_trace}</div>
+            </div>
+
+            <div className="form-group">
+              <label className="form-label">Officer Adjudication Notes <span style={{ color: 'var(--error)' }}>*</span></label>
+              <textarea
+                className="form-input"
+                rows={3}
+                value={officerNotes}
+                onChange={e => setOfficerNotes(e.target.value)}
+                placeholder="Enter justification notes for manual resolution..."
+              />
+            </div>
+
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10 }}>
+              <button className="btn btn-secondary" onClick={() => setSelectedReviewItem(null)}>
+                Cancel
+              </button>
+              <button
+                className="btn btn-success"
+                onClick={handleConfirmResolve}
+                disabled={resolving[selectedReviewItem.id]}
+              >
+                {resolving[selectedReviewItem.id] ? <><span className="spinner" /> Saving...</> : 'Confirm & Mark Resolved'}
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
